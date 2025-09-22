@@ -96,13 +96,10 @@
                                     <span class="badge bg-primary">{{ livro.total_emprestimos }}</span>
                                 </td>
                                 <td>
-                                    {% set livro_obj = Livro.query.filter_by(titulo=livro.titulo).first() %}
-                                    {% if livro_obj %}
-                                        {% if livro_obj.quantidade_disponivel > 0 %}
-                                            <span class="badge bg-success">Disponível</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Indisponível</span>
-                                        {% endif %}
+                                    {% if livro.disponivel %}
+                                        <span class="badge bg-success">Disponível</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Indisponível</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -227,77 +224,4 @@
     </div>
 </div>
 
-<!-- Características ISO/IEC 25010 -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-certificate"></i> Características ISO/IEC 25010 Implementadas
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-success">
-                            <div class="card-body">
-                                <h5 class="card-title text-success">
-                                    <i class="fas fa-check-circle"></i> Funcionalidade
-                                </h5>
-                                <p class="card-text">
-                                    <strong>Implementação:</strong> Sistema completo de gerenciamento de biblioteca com 
-                                    cadastro de livros, usuários, empréstimos e relatórios.
-                                </p>
-                                <ul class="small">
-                                    <li>Cadastro completo de livros</li>
-                                    <li>Gestão de usuários</li>
-                                    <li>Sistema de empréstimos</li>
-                                    <li>Relatórios e estatísticas</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-warning">
-                            <div class="card-body">
-                                <h5 class="card-title text-warning">
-                                    <i class="fas fa-shield-alt"></i> Confiabilidade
-                                </h5>
-                                <p class="card-text">
-                                    <strong>Implementação:</strong> Validações robustas, tratamento de erros, 
-                                    logging de eventos e recuperação de falhas.
-                                </p>
-                                <ul class="small">
-                                    <li>Validação de dados de entrada</li>
-                                    <li>Tratamento de exceções</li>
-                                    <li>Sistema de logging</li>
-                                    <li>Recuperação de transações</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card border-info">
-                            <div class="card-body">
-                                <h5 class="card-title text-info">
-                                    <i class="fas fa-user-friendly"></i> Usabilidade
-                                </h5>
-                                <p class="card-text">
-                                    <strong>Implementação:</strong> Interface intuitiva, navegação clara, 
-                                    feedback visual e design responsivo.
-                                </p>
-                                <ul class="small">
-                                    <li>Interface responsiva</li>
-                                    <li>Navegação intuitiva</li>
-                                    <li>Feedback visual adequado</li>
-                                    <li>Design acessível</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

@@ -82,8 +82,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for emprestimo in emprestimos %}
-                            <tr class="{{ 'table-warning' if emprestimo.status == 'ativo' and emprestimo.data_devolucao_prevista < emprestimo.data_emprestimo.replace(tzinfo=None) + timedelta(days=14) else '' }}">
+                            {% for item in emprestimos %}
+                            {% set emprestimo = item.emprestimo %}
+                            <tr class="{{ 'table-warning' if item.is_atrasado else '' }}">
                                 <td>
                                     <strong>#{{ emprestimo.id }}</strong>
                                 </td>
@@ -114,7 +115,7 @@
                                 </td>
                                 <td>
                                     {% if emprestimo.status == 'ativo' %}
-                                        {% if emprestimo.data_devolucao_prevista < emprestimo.data_emprestimo.replace(tzinfo=None) + timedelta(days=14) %}
+                                        {% if item.is_atrasado %}
                                             <span class="badge bg-danger">Atrasado</span>
                                         {% else %}
                                             <span class="badge bg-success">Ativo</span>
@@ -172,7 +173,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title text-primary">
-                    {{ emprestimos|selectattr('status', 'equalto', 'ativo')|list|length }}
+                    {{ stats.ativos }}
                 </h5>
                 <p class="card-text">Empréstimos Ativos</p>
             </div>
@@ -182,7 +183,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title text-success">
-                    {{ emprestimos|selectattr('status', 'equalto', 'devolvido')|list|length }}
+                    {{ stats.devolvidos }}
                 </h5>
                 <p class="card-text">Empréstimos Devolvidos</p>
             </div>
@@ -192,7 +193,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title text-danger">
-                    {{ emprestimos|selectattr('status', 'equalto', 'ativo')|selectattr('data_devolucao_prevista', 'lt', emprestimos[0].data_emprestimo.replace(tzinfo=None) + timedelta(days=14) if emprestimos else '')|list|length }}
+                    {{ stats.atrasados }}
                 </h5>
                 <p class="card-text">Empréstimos Atrasados</p>
             </div>
@@ -202,7 +203,7 @@
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title text-info">
-                    {{ emprestimos|length }}
+                    {{ stats.total }}
                 </h5>
                 <p class="card-text">Total de Empréstimos</p>
             </div>

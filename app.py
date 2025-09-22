@@ -291,7 +291,45 @@ def listar_emprestimos():
             query = query.filter_by(status=status)
         
         emprestimos = query.order_by(Emprestimo.data_emprestimo.desc()).all()
-        return render_template('emprestimos.html', emprestimos=emprestimos, status_selecionado=status)
+
+        # Enriquecer dados para o template sem usar timedelta no Jinja
+        agora_utc = datetime.utcnow()
+        emprestimos_view = []
+        total_ativos = 0
+        total_devolvidos = 0
+        total_atrasados = 0
+
+        for emp in emprestimos:
+            is_atrasado = (
+                emp.status == 'ativo'
+                and emp.data_devolucao_prevista is not None
+                and emp.data_devolucao_prevista < agora_utc
+            )
+            if emp.status == 'ativo':
+                total_ativos += 1
+                if is_atrasado:
+                    total_atrasados += 1
+            elif emp.status == 'devolvido':
+                total_devolvidos += 1
+
+            emprestimos_view.append({
+                'emprestimo': emp,
+                'is_atrasado': is_atrasado,
+            })
+
+        stats = {
+            'ativos': total_ativos,
+            'devolvidos': total_devolvidos,
+            'atrasados': total_atrasados,
+            'total': len(emprestimos)
+        }
+
+        return render_template(
+            'emprestimos.html',
+            emprestimos=emprestimos_view,
+            status_selecionado=status,
+            stats=stats
+        )
     except Exception as e:
         logger.error(f"Erro ao listar empréstimos: {e}")
         flash('Erro ao carregar lista de empréstimos', 'error')
@@ -382,13 +420,24 @@ def relatorios():
         estatisticas = calcular_estatisticas()
         
         # Livros mais emprestados
-        livros_populares = db.session.query(
-            Livro.titulo, 
+        livros_populares_rows = db.session.query(
+            Livro.titulo,
             Livro.autor,
+            Livro.quantidade_disponivel,
             db.func.count(Emprestimo.id).label('total_emprestimos')
         ).join(Emprestimo).group_by(Livro.id).order_by(
             db.func.count(Emprestimo.id).desc()
         ).limit(10).all()
+
+        livros_populares = [
+            {
+                'titulo': row.titulo,
+                'autor': row.autor,
+                'total_emprestimos': row.total_emprestimos,
+                'disponivel': (row.quantidade_disponivel or 0) > 0,
+            }
+            for row in livros_populares_rows
+        ]
         
         # Empréstimos por mês (últimos 6 meses)
         emprestimos_mensais = db.session.query(
@@ -398,10 +447,12 @@ def relatorios():
             Emprestimo.data_emprestimo >= datetime.utcnow() - timedelta(days=180)
         ).group_by('mes').order_by('mes').all()
         
-        return render_template('relatorios.html', 
-                             estatisticas=estatisticas,
-                             livros_populares=livros_populares,
-                             emprestimos_mensais=emprestimos_mensais)
+        return render_template(
+            'relatorios.html',
+            estatisticas=estatisticas,
+            livros_populares=livros_populares,
+            emprestimos_mensais=emprestimos_mensais
+        )
     except Exception as e:
         logger.error(f"Erro ao gerar relatórios: {e}")
         flash('Erro ao gerar relatórios', 'error')
