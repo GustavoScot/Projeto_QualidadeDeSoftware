@@ -462,7 +462,7 @@ def relatorios():
 def busca_avancada():
     """Busca avançada - FUNCIONALIDADE 4"""
     try:
-        termo = request.args.get('q', '')
+        termo = request.args.get('q', '').strip()
         tipo = request.args.get('tipo', 'todos')
         categoria = request.args.get('categoria', '')
         ano_min = request.args.get('ano_min', '')
